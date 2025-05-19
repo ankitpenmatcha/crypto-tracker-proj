@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Watchlist</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Google Font already in your layout -->
+</head>
+<body>
+  <div class="container">
+    <!-- Home button -->
+    <a href="/" class="btn-home">← Home</a>
+
+    <h1><%= email %>'s Watchlist</h1>
+
+    <!-- Add Coin Form -->
+    <form action="/watchlist" method="POST" class="add-form">
+      <!-- carry email -->
+      <input type="hidden" name="email" value="<%= email %>">
+
+      <label for="coinId">Coin ID:</label>
+      <input type="text" id="coinId" name="coinId" required>
+
+      <label for="targetPrice">Target Price:</label>
+      <input type="number" id="targetPrice" name="targetPrice" step="0.01" required>
+
+      <button type="submit">Add to Watchlist</button>
+    </form>
+
+    <!-- Watchlist Display -->
+    <h2>Your Coins</h2>
+    <ul class="watchlist">
+      <% if (items.length === 0) { %>
+        <li>No coins yet—go ahead and add one!</li>
+      <% } %>
+      <% items.forEach(item => { %>
+        <li class="watchlist-item">
+          <div class="coin-info">
+            <strong><%= item.coinName %></strong> (<%= item.coinId %>)<br>
+            Added at: $<%= item.initialPrice.toFixed(2) %><br>
+            Current: 
+            <% if (item.currentPrice !== null) { %>
+              $<%= item.currentPrice.toFixed(2) %>
+            <% } else { %>
+              N/A
+            <% } %><br>
+            Target: $<%= Number(item.targetPrice).toFixed(2) %>
+          </div>
+          <form action="/watchlist/delete/<%= item._id %>" method="POST">
+            <!-- carry email -->
+            <input type="hidden" name="email" value="<%= email %>">
+            <button type="submit">Remove</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</body>
+</html>
