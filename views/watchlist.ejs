@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Your Watchlist</title>
   <link rel="stylesheet" href="/css/style.css">
-  <!-- Google Font already in your layout -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <div class="container">
-    <!-- Home button -->
     <a href="/" class="btn-home">← Home</a>
 
-    <h1><%= email %>'s Watchlist</h1>
+    <h1>
+      <%= email %>'s Watchlist
+    </h1>
 
-    <!-- Add Coin Form -->
     <form action="/watchlist" method="POST" class="add-form">
-      <!-- carry email -->
       <input type="hidden" name="email" value="<%= email %>">
 
       <label for="coinId">Coin ID:</label>
@@ -27,33 +30,74 @@
       <button type="submit">Add to Watchlist</button>
     </form>
 
-    <!-- Watchlist Display -->
     <h2>Your Coins</h2>
     <ul class="watchlist">
-      <% if (items.length === 0) { %>
+      <% if (items.length===0) { %>
         <li>No coins yet—go ahead and add one!</li>
-      <% } %>
-      <% items.forEach(item => { %>
-        <li class="watchlist-item">
-          <div class="coin-info">
-            <strong><%= item.coinName %></strong> (<%= item.coinId %>)<br>
-            Added at: $<%= item.initialPrice.toFixed(2) %><br>
-            Current: 
-            <% if (item.currentPrice !== null) { %>
-              $<%= item.currentPrice.toFixed(2) %>
-            <% } else { %>
-              N/A
-            <% } %><br>
-            Target: $<%= Number(item.targetPrice).toFixed(2) %>
-          </div>
-          <form action="/watchlist/delete/<%= item._id %>" method="POST">
-            <!-- carry email -->
-            <input type="hidden" name="email" value="<%= email %>">
-            <button type="submit">Remove</button>
-          </form>
-        </li>
-      <% }) %>
+        <% } %>
+          <% items.forEach(item=> { %>
+            <li class="watchlist-item">
+              <div class="coin-info">
+                <strong>
+                  <%= item.coinName %>
+                </strong> (<%= item.coinId %>)<br>
+                  Added at: $<%= item.initialPrice.toFixed(2) %><br>
+                    Current:
+                    <% if (item.currentPrice !==null) { %>
+                      $<%= item.currentPrice.toFixed(2) %>
+                        <% } else { %>
+                          N/A
+                          <% } %><br>
+                            Target: $<%= Number(item.targetPrice).toFixed(2) %>
+              </div>
+              <form action="/watchlist/delete/<%= item._id %>" method="POST">
+                <input type="hidden" name="email" value="<%= email %>">
+                <button type="submit">Remove</button>
+              </form>
+            </li>
+            <% }) %>
     </ul>
   </div>
+  <script>
+    ; (function () {
+      const form = document.querySelector('.add-form');
+      if (!form) return;
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+          params.append(key, value);
+        }
+
+        try {
+          const resp = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params
+          });
+
+          if (!resp.ok) {
+            const msg = await resp.text();
+            alert(msg.trim() || 'Error adding coin');
+          } else {
+            window.location.reload();
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Network error. Please try again.');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
 </body>
+
 </html>

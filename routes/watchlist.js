@@ -1,13 +1,12 @@
 const express = require('express');
-const axios   = require('axios');
+const axios = require('axios');
 const WatchlistItem = require('../models/WatchlistItem');
-const router  = express.Router();
+const router = express.Router();
 
 // GET /watchlist?email=you@host.com
 router.get('/', async (req, res) => {
   const email = req.query.email;
   if (!email) {
-    // no email → just redirect back to home
     return res.redirect('/');
   }
 
@@ -33,7 +32,7 @@ router.get('/', async (req, res) => {
 
     res.render('watchlist', {
       items: itemsWithPrice,
-      email  // pass email so EJS can include it in forms
+      email
     });
   } catch (err) {
     console.error(err);
@@ -45,7 +44,6 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { email, coinId, targetPrice } = req.body;
   try {
-    // 1) hit the markets endpoint for both name + price
     const marketRes = await axios.get(
       'https://api.coingecko.com/api/v3/coins/markets',
       {
@@ -63,11 +61,11 @@ router.post('/', async (req, res) => {
     }
 
     const newItem = new WatchlistItem({
-      userEmail:    email,
-      coinId:       coinData.id,            // echo back the id
-      coinName:     coinData.name,          // fetched for you
-      targetPrice:  Number(targetPrice),
-      initialPrice: coinData.current_price  // fetched
+      userEmail: email,
+      coinId: coinData.id,
+      coinName: coinData.name,
+      targetPrice: Number(targetPrice),
+      initialPrice: coinData.current_price
     });
 
     await newItem.save();
